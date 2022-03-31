@@ -3,15 +3,6 @@ const ErrorHandler = require("../utils/errorhandler");
 const catchErrors = require("../middleware/catchErrors");
 const ApiFeatures = require("../utils/apifeatures");
 
-exports.createMedicine = catchErrors(async (req, res, next) => {
-  const medicine = await Medicine.create(req.body);
-
-  res.status(201).json({
-    success: true,
-    medicine,
-  });
-});
-
 exports.getAllMedicines = catchErrors(async (req, res) => {
   const resultPerPage = 5;
   const medicineCount = await Medicine.countDocuments();
@@ -25,7 +16,7 @@ exports.getAllMedicines = catchErrors(async (req, res) => {
   res.status(200).json({
     success: true,
     medicines,
-    medicineCount
+    medicineCount,
   });
 });
 
@@ -37,6 +28,19 @@ exports.getMedicineDetails = catchErrors(async (req, res, next) => {
   }
 
   res.status(200).json({
+    success: true,
+    medicine,
+  });
+});
+
+
+//ADMIN
+exports.createMedicine = catchErrors(async (req, res, next) => {
+  req.body.user = req.user.id;
+
+  const medicine = await Medicine.create(req.body);
+
+  res.status(201).json({
     success: true,
     medicine,
   });

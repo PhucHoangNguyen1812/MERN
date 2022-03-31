@@ -6,13 +6,19 @@ const {
   deleteMedicine,
   getMedicineDetails,
 } = require("../controllers/medicineController");
+const { isAuthenticatedUser,authorizeRoles } = require("../middleware/auth");
 
 const router = express.Router();
 
 router.route("/medicines").get(getAllMedicines);
 
-router.route("/medicine/new").post(createMedicine);
+router.route("admin/medicine/new").post(isAuthenticatedUser,authorizeRoles("admin"), createMedicine);
 
-router.route("/medicine/:id").put(updateMedicine).delete(deleteMedicine).get(getMedicineDetails);
+router
+  .route("admin/medicine/:id")
+  .put(isAuthenticatedUser,authorizeRoles("admin"),updateMedicine)
+  .delete(isAuthenticatedUser,authorizeRoles("admin"),deleteMedicine)
+  
+router.route("/medicine/:id").get(getMedicineDetails);
 
 module.exports = router;
