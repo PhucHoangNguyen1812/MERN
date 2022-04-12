@@ -10,7 +10,7 @@ module.exports = (err, req, res, next) => {
   }
 
   if (err.code === 11000) {
-    const message = `Trung lap ${Object.keys(err.keyValue)} da nhap`;
+    const message = `Trung ${Object.keys(err.keyValue)} da nhap`;
     err = new ErrorHandler(message, 400);
   }
 

@@ -33,12 +33,11 @@ router.route("/password/update").put(isAuthenticatedUser, updatePassword);
 
 router.route("/me/update").put(isAuthenticatedUser, updateProfile);
 
-router.route("/me/update").put(isAuthenticatedUser, updateProfile);
 
-//Router ADMIN
+
 router
   .route("/admin/users")
-  .get(isAuthenticatedUser, authorizeRoles("admin"), getAllUser);
+  .get(isAuthenticatedUser, authorizeRoles("dfgf"), getAllUser);
 
 router
   .route("/admin/user/:id")

@@ -4,8 +4,14 @@ const User = require("../models/userModel");
 const sendToken = require("../utils/jwtToken");
 const sendEmail = require("../utils/sendEmail");
 const crypto = require("crypto");
+const cloudinary = require("cloudinary");
 
 exports.registerUser = catchErrors(async (req, res, next) => {
+  const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+    folder: "avatars",
+    width: 150,
+    crop: "scale",
+  });
   const { name, email, password } = req.body;
 
   const user = await User.create({
@@ -13,8 +19,8 @@ exports.registerUser = catchErrors(async (req, res, next) => {
     email,
     password,
     avatar: {
-      public_id: "this is avatar",
-      url: "profileUri",
+      public_id: myCloud.public_id,
+      url: myCloud.secure_url,
     },
   });
 
@@ -66,9 +72,7 @@ exports.forgotPassword = catchErrors(async (req, res, next) => {
 
   await user.save({ validateBeforeSave: false });
 
-  const resetPasswordUrl = `${req.protocol}://${req.get(
-    "host"
-  )}/api/v1/password/reset/${resetToken}`;
+  const resetPasswordUrl = `${process.env.REACT_URL}/password/reset/${resetToken}`;
 
   const message = `token doi ma khau cua ban :- \n\n ${resetPasswordUrl} \n\nNeu khong nhan dc email nay.Thi nhan gui lai `;
 
@@ -158,6 +162,25 @@ exports.updateProfile = catchErrors(async (req, res, next) => {
     email: req.body.email,
   };
 
+  if (req.body.avatar !== "") {
+    const user = await User.findById(req.user.id);
+
+    const imageId = user.avatar.public_id;
+
+    await cloudinary.v2.uploader.destroy(imageId);
+
+    const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+      folder: "avatars",
+      width: 150,
+      crop: "scale",
+    });
+
+    newUser.avatar = {
+      public_id: myCloud.public_id,
+      url: myCloud.secure_url,
+    };
+  }
+
   const user = await User.findByIdAndUpdate(req.user.id, newUser, {
     new: true,
     runValidators: true,
@@ -217,7 +240,7 @@ exports.deleteUser = catchErrors(async (req, res, next) => {
 
   if (!user) {
     return next(
-      new ErrorHandler(`Tai khoan khong ton tai voi Id:${req.params.id}`,400)
+      new ErrorHandler(`Tai khoan khong ton tai voi Id:${req.params.id}`, 400)
     );
   }
 
@@ -225,6 +248,6 @@ exports.deleteUser = catchErrors(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message:"Xoa tai khoan thanh cong"
+    message: "Xoa tai khoan thanh cong",
   });
 });
